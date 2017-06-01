@@ -1,0 +1,11 @@
+{
+  "name": "CloudMan",
+  "description": "DataMachine's CloudManager",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "~1.6.2"
+  }
+}

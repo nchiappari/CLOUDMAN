@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cloud Manager</title>
+
+    <!-- following line goes BEFORE external script imports -->
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="../scripts/scripts.js"></script>
+    <script src="../scripts/openstack_api_management.js"></script>
+    <script src="../scripts/html_generators.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="../stylesheets/style.css">
+
+    <!-- following line goes AFTER script imports -->
+    <script>if (window.module) module = window.module;</script>
+
+    <script>
+
+      var request = require('request');
+      var http = require('http');
+
+      var UNSCOPED_TOKEN
+      var token_map = {} // for some endpoints we need project specific tokens
+      var USER_NAME = "nchiappari"
+      var PASSWORD = ""
+
+      var URL_AUTH = "http://10.107.0.2:5000/v3/auth/tokens"
+      // endpoints defined during auth process
+      var URL_COMPUTE
+
+      var all_instances = []
+
+    </script>
+
+  </head>
+  <body>
+    <div class="container">
+      <span id="alert_area"></span>
+
+    </div>
+    <div class="container">
+      <h1>Cloud Manager</h1>
+      <span id="loader">
+      </span>
+      <script>
+
+        document.write(create_accordion_entry("Cloud Info", "View resource usage and error and down states here.", "cloud-info"))
+        // document.write(create_accordion_entry("Security Group Creation", "View resource usage and error and down states here.", "security-groups"))
+        // document.write(create_accordion_entry("New Project Creation", "View resource usage and error and down states here.", "new-project"))
+        document.write(create_accordion_entry("VM Interaction", "<span id='vm_interaction_table'>Loading...</span>", "vm-management"))
+        // document.write(create_accordion_entry("Cluster Logs", "View resource usage and error and down states here.", "cluster-logs"))
+      </script>
+    </div>
+  </body>
+</html>
+
+<script>
+  // require('./renderer.js')
+  if (USER_NAME == "") {
+    display_alert(false, false, "No username was provided.")
+  } else if (PASSWORD == "") {
+    display_alert(false, false, "No password was provided.")
+  } else {
+    set_loader(true)
+    set_unscoped_access_token(function() {
+      populate_with_initial_data()
+    })
+  }
+</script>
