@@ -6,7 +6,9 @@ function make_GET_request(url, token, callback) {
       headers: {'X-Auth-Token': token},
   }, function(error, response, body) {
       if (error) {
-          handle_errors(response.statusCode, response)
+        set_loader(false)
+        display_alert(false, false, "An error occurred making a GET request to " + url)
+        handle_errors(response)
       } else {
         callback(JSON.parse(body))
       }
@@ -23,16 +25,16 @@ function make_POST_request(url, project_id, post_data, callback) {
         headers: {'X-Auth-Token': token},
     }, function(error, response, body) {
         if (error) {
-            handle_errors(response.statusCode, response)
+            handle_errors(response)
         } else {
-          callback(response)
+          callback(body)
         }
     });
   })
 }
 
-function handle_errors(statusCode, response) {
-  console.error("error handling coming to codebase near you soon"+statusCode)
+function handle_errors(response) {
+  console.error("error handling coming to codebase near you soon"+response)
 }
 
 
@@ -79,9 +81,20 @@ function set_unscoped_access_token(callback) {
       } else {
         UNSCOPED_TOKEN = response['headers']['x-subject-token']
         body['token']['catalog'].forEach(function (service) {
+          // console.log(service)
+          var endpoints = service['endpoints']
+          for (var i = 0; i < endpoints.length; i += 1) {
+            if (endpoints[i]['interface'] == "public") {
+              var url = endpoints[i]['url']
+              break
+            }
+          }
           if (service['name'] == "nova") {
-            endpoints = service['endpoints']
-            URL_COMPUTE = endpoints[endpoints.length - 1]['url']
+            URL_COMPUTE = url
+          } else if (service['name'] == "neutron") {
+            URL_NETWORKING = url
+          } else if (service['name'] == "keystone") {
+            URL_IDENTITY = url.replace("/v2.0", "/v3") //v2.0 is deprecated
           }
         })
         callback()

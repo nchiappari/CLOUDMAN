@@ -14,6 +14,9 @@
     <script src="../scripts/scripts.js"></script>
     <script src="../scripts/openstack_api_management.js"></script>
     <script src="../scripts/html_generators.js"></script>
+    <script src="../scripts/os-compute.js"></script>
+    <script src="../scripts/os-identity.js"></script>
+    <script src="../scripts/os-networks.js"></script>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="../stylesheets/style.css">
@@ -34,6 +37,8 @@
       var URL_AUTH = "http://10.107.0.2:5000/v3/auth/tokens"
       // endpoints defined during auth process
       var URL_COMPUTE
+      var URL_NETWORKING
+      var URL_IDENTITY
 
       var all_instances = []
 
@@ -49,10 +54,11 @@
       <h1>Cloud Manager</h1>
       <span id="loader">
       </span>
+
       <script>
 
         document.write(create_accordion_entry("Cloud Info", "View resource usage and error and down states here.", "cloud-info"))
-        // document.write(create_accordion_entry("Security Group Creation", "View resource usage and error and down states here.", "security-groups"))
+        document.write(create_accordion_entry("Security Group Management", "<span id='security_group_management'>Loading...</span>", "security-groups"))
         // document.write(create_accordion_entry("New Project Creation", "View resource usage and error and down states here.", "new-project"))
         document.write(create_accordion_entry("VM Interaction", "<span id='vm_interaction_table'>Loading...</span>", "vm-management"))
         // document.write(create_accordion_entry("Cluster Logs", "View resource usage and error and down states here.", "cluster-logs"))

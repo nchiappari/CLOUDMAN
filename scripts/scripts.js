@@ -1,8 +1,16 @@
-function change_occurred(command, id, project_id) {
+
+function change_occurred(command, id, alt_id) {
   switch (command) {
     case "vm_select":
-      action_requested_on_instance(id, project_id)
-      break;
+      action_requested_on_instance(id, alt_id)
+      break
+    case "new_security_group":
+      set_loader(true)
+      var name = document.getElementById('new_security_group_name').value
+      var description = document.getElementById('new_security_group_desc').value
+      var project_id = document.getElementById('new_security_group_proj_id').value
+      create_new_security_group(name, description, project_id)
+      break
     default:
 
   }
@@ -22,28 +30,25 @@ function action_requested_on_instance(id, project_id) {
     var new_status = "ACTIVE"
   }
   var url = URL_COMPUTE + "/servers/" + id + "/action"
-  make_POST_request(url, project_id, post_data, function(response) {
-    if (response.statusCode == 202) {
-      for (var i = 0; i < all_instances.length; i += 1) {
-        if (all_instances[i]['id'] == id) {
-          all_instances[i]['status'] = new_status
-          break
-        }
+  make_POST_request(url, project_id, post_data, function(body) {
+    for (var i = 0; i < all_instances.length; i += 1) {
+      if (all_instances[i]['id'] == id) {
+        all_instances[i]['status'] = new_status
+        break
       }
-      build_vm_interaction_table(function() {
-        set_loader(false)
-      })
-    } else {
-
     }
+    build_vm_interaction_table(function() {
+      set_loader(false)
+    })
   })
 }
 
 function populate_with_initial_data() {
   set_all_instances(function () {
     build_vm_interaction_table(function() {
-
+      set_loader(false)
     })
   })
+  build_security_group_management()
 
 }
