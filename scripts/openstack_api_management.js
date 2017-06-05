@@ -1,11 +1,16 @@
 function make_GET_request(url, token, callback) {
-  console.log("MAKING GET REQUEST - " + url)
+  console.log("MAKING GET REQUEST: " + url)
+  console.log("TOKEN: " + token)
   request({
       url: url,
       method: 'GET',
       headers: {'X-Auth-Token': token},
   }, function(error, response, body) {
-      if (error) {
+      if (response.statusCode && response.statusCode == 401) {
+        set_loader(false)
+        display_alert(false, true, "You are not authorized to complete this action.")
+      }
+      else if (error) {
         set_loader(false)
         display_alert(false, false, "An error occurred making a GET request to " + url)
         handle_errors(response)
@@ -24,11 +29,15 @@ function make_POST_request(url, project_id, post_data, callback) {
         json: post_data,
         headers: {'X-Auth-Token': token},
     }, function(error, response, body) {
-        if (error) {
-            handle_errors(response)
-        } else {
-          callback(body)
-        }
+      if (response.statusCode && response.statusCode == 401) {
+        set_loader(false)
+        display_alert(false, true, "You are not authorized to complete this action.")
+      }
+      else if (error) {
+        handle_errors(response)
+      } else {
+        callback(body)
+      }
     });
   })
 }
@@ -40,25 +49,33 @@ function handle_errors(response) {
 
 //gets token for a specific project - sets it first if necessary
 function get_token(project_id, callback) {
-  if (project_id in token_map) {
-    return callback(token_map[project_id])
+  console.log("IN GET TOKEN")
+  if (project_id in TOKEN_MAP) {
+    return callback(TOKEN_MAP[project_id])
   }
   set_access_token(project_id, callback)
 }
 
 // sets an access token scoped to a specific project
 function set_access_token(project_id, callback) {
+    console.log("IN SET ACCESS")
+    console.log("URL:"+URL_AUTH)
+
     post_data = {"auth": {"identity": {"methods": ["password"],"password": {"user": {
                   "domain": {"name": "users"},"name": USER_NAME,"password": PASSWORD}}},
                   "scope":
                   {"project": {"domain": {"name": "users"},"id": project_id}}}}
+
+    console.log("POST DATA:"+JSON.stringify(post_data))
+
     request({
       url: URL_AUTH,
       method: 'POST',
       json: post_data
     }, function(error, response, body) {
-      token_map[project_id] = response['headers']['x-subject-token']
-      callback(token_map[project_id])
+      TOKEN_MAP[project_id] = response['headers']['x-subject-token']
+      console.log("FINAL TOKEN"+response['headers']['x-subject-token'])
+      callback(TOKEN_MAP[project_id])
     });
 }
 

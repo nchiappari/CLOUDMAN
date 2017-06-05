@@ -11,6 +11,20 @@ function change_occurred(command, id, alt_id) {
       var project_id = document.getElementById('new_security_group_proj_id').value
       create_new_security_group(name, description, project_id)
       break
+    case "retrieve_security_groups_for_new_rule":
+      set_loader(true)
+      var project_id = document.getElementById('new_rule_project_select').value
+      get_all_security_groups(project_id, function(security_groups) {
+        add_security_group_options(security_groups, function() {
+          set_loader(false)
+        })
+
+      })
+      break
+    case 'create_new_group_rule':
+      set_loader(true)
+      create_new_group_rule()
+      break;
     default:
 
   }
@@ -49,6 +63,7 @@ function populate_with_initial_data() {
       set_loader(false)
     })
   })
-  build_security_group_management()
-
+  get_all_projects(function(projects) {
+    build_security_group_management(projects, [{"name":"first security group"}])
+  })
 }
