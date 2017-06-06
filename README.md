@@ -13,7 +13,7 @@
  ## Priorities
  * Read only information about each cloud
    * Resource usage
-   * Any instances in an "error" state
+   * ~~Any instances in an "error" state~~
    * Any hypervisor in a "down" state
  * Alerts
  * Common tasks
