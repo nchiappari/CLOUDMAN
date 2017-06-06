@@ -17,6 +17,7 @@
     <script src="../scripts/os-compute.js"></script>
     <script src="../scripts/os-identity.js"></script>
     <script src="../scripts/os-networks.js"></script>
+    <script src="../scripts/ui_scripts.js"></script>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="../stylesheets/style.css">
@@ -30,9 +31,12 @@
       var http = require('http');
 
       var UNSCOPED_TOKEN
-      var token_map = {} // for some endpoints we need project specific tokens
+      var TOKEN_MAP = {} // for some endpoints we need project specific tokens
       var USER_NAME = "nchiappari"
       var PASSWORD = ""
+      var BASE_SECURITY_DATA = get_base_security_data()
+      var BASE_SECURITY_RULES = BASE_SECURITY_DATA['rules']
+      var BASE_SECURITY_GROUPS = BASE_SECURITY_DATA['groups']
 
       var URL_AUTH = "http://10.107.0.2:5000/v3/auth/tokens"
       // endpoints defined during auth process
@@ -58,9 +62,9 @@
       <script>
 
         document.write(create_accordion_entry("Cloud Info", "View resource usage and error and down states here.", "cloud-info"))
-        document.write(create_accordion_entry("Security Group Management", "<span id='security_group_management'>Loading...</span>", "security-groups"))
-        // document.write(create_accordion_entry("New Project Creation", "View resource usage and error and down states here.", "new-project"))
         document.write(create_accordion_entry("VM Interaction", "<span id='vm_interaction_table'>Loading...</span>", "vm-management"))
+        document.write(create_accordion_entry("Security Group Management", "<span id='security_group_management'>Loading...</span>", "security-groups"))
+        // document.write(create_accordion_entry("Project Management", "<span id='project_management'>Loading...</span>", "new-project"))
         // document.write(create_accordion_entry("Cluster Logs", "View resource usage and error and down states here.", "cluster-logs"))
       </script>
     </div>
@@ -74,7 +78,6 @@
   } else if (PASSWORD == "") {
     display_alert(false, false, "No password was provided.")
   } else {
-    set_loader(true)
     set_unscoped_access_token(function() {
       populate_with_initial_data()
     })
