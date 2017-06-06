@@ -1,0 +1,55 @@
+{
+  "rules":{
+      "ssh":{
+        "name":"SSH",
+        "ports":[22],
+        "protocol":"tcp"
+      },
+      "http":{
+        "name":"HTTP",
+        "ports":[80],
+        "protocol":"tcp"
+      },
+      "https":{
+        "name":"HTTPS",
+        "ports":[443],
+        "protocol":"tcp"
+      },
+      "ceph":{
+        "name":"Ceph",
+        "ports":[6789],
+        "protocol":"tcp"
+      },
+      "nfs":{
+        "name":"NFS",
+        "ports":[445],
+        "protocol":"tcp"
+      },
+      "cifs":{
+        "name":"CIFS",
+        "ports":[137, 138],
+        "protocol":"tcp"
+      }
+  },
+  "groups":{
+      "SSH":{
+        "description":"Default SSH security group.",
+        "rules":[
+          {"type":"ssh", "ingress":true, "egress":false}
+        ]
+      },
+      "HTTP":{
+        "description":"Default HTTP security group.",
+        "rules":[
+          {"type":"http", "ingress":false, "egress":true}
+        ]
+      },
+      "HTTPS":{
+        "description":"Default HTTPS security group.",
+        "rules":[
+          {"type":"https", "ingress":true, "egress":true}
+        ]
+      }
+
+  }
+}
