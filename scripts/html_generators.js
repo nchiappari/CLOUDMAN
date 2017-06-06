@@ -46,9 +46,6 @@ function build_vm_interaction_table(callback) {
     callback()
 }
 
-var pre_p = "un"
-var post_p = "unm"
-
 function add_security_group_options(security_groups, callback) {
   var content = '<select id="new_rule_security_group"><option>Select Security Group...</option>'
   if (security_groups.length > 1) {
@@ -67,7 +64,37 @@ function build_security_group_management(projects, security_groups) {
     projects.sort(function (a, b) {
       return a.name.localeCompare(b.name)
     })
-    var content = '<b>Create New Security Group</b>\
+    var content = '<b>Assign Pre-Configured Security Groups</b>\
+                    <table>\
+                      <tr>\
+                        <td>Project:</td>\
+                        <td>\
+                          <select id="select_project_group_assign">\
+                            <option>Select Project...</option>'
+    projects.forEach(function(project) {
+      content +=            '<option value="' + project['id'] + '">' + project['name'] + '</option>'
+    })
+    content +=            '</select>\
+                        </td>\
+                      </tr>\
+                      <tr>\
+                        <td>\
+                          Groups to assign:\
+                        </td>\
+                        <td>'
+    for (var group in BASE_SECURITY_GROUPS) {
+      content += '<label><input type="checkbox" id="checkbox_assign_' + group + '">'+group+'</label> '
+    }
+    content +=          '</td>\
+                      </tr>\
+                      <tr>\
+                        <td></td>\
+                        <td>\
+                          <button onclick="change_occurred(`submit_assign`)">Assign</button>\
+                        </td>\
+                      </tr>\
+                    </table><br>\
+                  <b>Manually Create New Security Group</b>\
                     <table>\
                       <tr>\
                         <td>Name:</td><td><input type="text" id="new_security_group_name"></td>\
@@ -90,7 +117,7 @@ function build_security_group_management(projects, security_groups) {
                         <td></td><td><button onclick="change_occurred(`new_security_group`)">Create</button></td>\
                       </tr>\
                     </table><br>\
-                    <b>Add Security Group Rule</b>\
+                    <b>Manually Add Security Group Rule</b>\
                     <table>\
                       <tr>\
                         <td>Project:</td>\
@@ -118,11 +145,11 @@ function build_security_group_management(projects, security_groups) {
                         <td>\
                           <span id="security_rule_select">\
                             <select id="new_rule_type">\
-                              <option>Select Rule Type...</option>\
-                              <option>HTTP</option>\
-                              <option>HTTPS</option>\
-                              <option>SSH</option>\
-                            </select>\
+                              <option>Select Rule Type...</option>'
+      for (var key in BASE_SECURITY_RULES) {
+        content +=             '<option value="' + key + '">' + BASE_SECURITY_RULES[key]['name'] + '</option>'
+      }
+      content +=            '</select>\
                           </span>\
                         </td>\
                       </tr>\
@@ -137,43 +164,4 @@ function build_security_group_management(projects, security_groups) {
                       </tr>\
                     </table><br>'
     document.getElementById('security_group_management').innerHTML = content
-}
-
-// toggles the loading screen
-function set_loader(bool) {
-  if (bool) {
-    content = '<div class="popup spinner">\
-                <div class="rect1"></div>\
-                <div class="rect2"></div>\
-                <div class="rect3"></div>\
-                <div class="rect4"></div>\
-                <div class="rect5"></div>\
-              </div>\
-              <div class="fadeMe"></div>'
-  } else {
-    content = ""
-  }
-  document.getElementById('loader').innerHTML = content
-}
-
-function display_alert(is_success, is_timeout, message) {
-  var success = '<div class="alert alert-success alert-dismissable fade in">\
-    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>\
-    <strong>Success!</strong> ' + message + ' \
-  </div>';
-  var failure = '<div class="alert alert-danger alert-dismissable fade in">\
-    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>\
-    <strong>Error:</strong> ' + message +'\
-  </div>'
-  var alert_area = document.getElementById("alert_area");
-  if (is_success) {
-    alert_area.innerHTML = success
-  } else {
-    alert_area.innerHTML = failure
-  }
-  if (is_timeout) {
-    setTimeout(function() {
-      alert_area.innerHTML = ""
-    }, 5000);
-  }
 }

@@ -1,55 +1,70 @@
-function make_GET_request(url, token, callback) {
-  console.log("MAKING GET REQUEST: " + url)
-  console.log("TOKEN: " + token)
+
+function make_UNSCOPED_GET_request(url, callback) {
   request({
       url: url,
       method: 'GET',
-      headers: {'X-Auth-Token': token},
+      headers: {'X-Auth-Token': UNSCOPED_TOKEN},
+      json: true
   }, function(error, response, body) {
-      if (response.statusCode && response.statusCode == 401) {
-        set_loader(false)
-        display_alert(false, true, "You are not authorized to complete this action.")
-      }
-      else if (error) {
-        set_loader(false)
-        display_alert(false, false, "An error occurred making a GET request to " + url)
-        handle_errors(response)
-      } else {
-        callback(JSON.parse(body))
-      }
+      handle_response(error, response, body, callback)
   });
+}
+
+function make_GET_request(url, project_id, callback) {
+  get_token(project_id, function(token) {
+    request({
+        url: url,
+        method: 'GET',
+        headers: {'X-Auth-Token': token},
+        json: true
+    }, function(error, response, body) {
+        handle_response(error, response, body, callback)
+    });
+  })
 }
 
 function make_POST_request(url, project_id, post_data, callback) {
   get_token(project_id, function (token) {
-    console.log("MAKING POST REQUEST - " + url);
     request({
         url: url,
         method: 'POST',
         json: post_data,
         headers: {'X-Auth-Token': token},
     }, function(error, response, body) {
-      if (response.statusCode && response.statusCode == 401) {
-        set_loader(false)
-        display_alert(false, true, "You are not authorized to complete this action.")
-      }
-      else if (error) {
-        handle_errors(response)
-      } else {
-        callback(body)
-      }
+      handle_response(error, response, body, callback)
     });
   })
 }
 
-function handle_errors(response) {
-  console.error("error handling coming to codebase near you soon"+response)
+function make_DELETE_request(url, project_id, callback) {
+  get_token(project_id, function (token) {
+    request({
+        url: url,
+        method: 'DELETE',
+        headers: {'X-Auth-Token': token},
+    }, function(error, response, body) {
+      handle_response(error, response, body, callback)
+    });
+  })
 }
 
+function handle_response(error, response, body, callback) {
+  if (response.statusCode && response.statusCode == 401) {
+    set_loader(false)
+    display_alert(false, true, "You are not authorized to complete this action.")
+  } else if (body.NeutronError && body.NeutronError['type'] == "OverQuota") {
+    set_loader(false)
+    display_alert(false, true, "You have exceeded the quota for this action.")
+  } else if (error) {
+    set_loader(false)
+    console.error("error handling coming to a codebase near you soon"+response)
+  } else {
+    callback(body)
+  }
+}
 
 //gets token for a specific project - sets it first if necessary
 function get_token(project_id, callback) {
-  console.log("IN GET TOKEN")
   if (project_id in TOKEN_MAP) {
     return callback(TOKEN_MAP[project_id])
   }
@@ -58,23 +73,16 @@ function get_token(project_id, callback) {
 
 // sets an access token scoped to a specific project
 function set_access_token(project_id, callback) {
-    console.log("IN SET ACCESS")
-    console.log("URL:"+URL_AUTH)
-
     post_data = {"auth": {"identity": {"methods": ["password"],"password": {"user": {
                   "domain": {"name": "users"},"name": USER_NAME,"password": PASSWORD}}},
                   "scope":
                   {"project": {"domain": {"name": "users"},"id": project_id}}}}
-
-    console.log("POST DATA:"+JSON.stringify(post_data))
-
     request({
       url: URL_AUTH,
       method: 'POST',
       json: post_data
     }, function(error, response, body) {
       TOKEN_MAP[project_id] = response['headers']['x-subject-token']
-      console.log("FINAL TOKEN"+response['headers']['x-subject-token'])
       callback(TOKEN_MAP[project_id])
     });
 }
@@ -97,8 +105,8 @@ function set_unscoped_access_token(callback) {
         display_alert(false, false, "Could not connect to OpenStack.")
       } else {
         UNSCOPED_TOKEN = response['headers']['x-subject-token']
-        body['token']['catalog'].forEach(function (service) {
-          // console.log(service)
+        var catalog = body['token']['catalog']
+        catalog.forEach(function (service) {
           var endpoints = service['endpoints']
           for (var i = 0; i < endpoints.length; i += 1) {
             if (endpoints[i]['interface'] == "public") {
@@ -121,7 +129,7 @@ function set_unscoped_access_token(callback) {
 
 // defines global all_instances
 function set_all_instances(callback) {
-  make_GET_request(URL_COMPUTE + "/servers/detail", UNSCOPED_TOKEN, function(body) {
+  make_UNSCOPED_GET_request(URL_COMPUTE + "/servers/detail", function(body) {
     all_instances = body['servers']
     callback()
   })

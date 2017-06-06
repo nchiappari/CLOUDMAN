@@ -1,4 +1,9 @@
 
+function get_base_security_data() {
+  var fs = require('fs');
+  return JSON.parse(fs.readFileSync('security_groups.json', 'utf8'));
+}
+
 function change_occurred(command, id, alt_id) {
   switch (command) {
     case "vm_select":
@@ -23,8 +28,32 @@ function change_occurred(command, id, alt_id) {
       break
     case 'create_new_group_rule':
       set_loader(true)
-      create_new_group_rule()
-      break;
+      try {
+        if (document.getElementById('new_rule_direction').checked) {
+          var direction = "ingress"
+        } else {
+          var direction = "egress"
+        }
+        var security_group_id = document.getElementById('new_rule_security_group').value
+        var project_id = document.getElementById('new_rule_project_select').value
+        var type = document.getElementById('new_rule_type').value
+      } catch (err) {
+        set_loader(false)
+        display_alert(false, true, "Please fill out all required fields.")
+        return
+      }
+      create_new_group_rule(security_group_id, project_id, type, direction)
+      break
+    case 'submit_assign':
+      var project_id = document.getElementById('select_project_group_assign').value
+      var groups_to_assign = []
+      for (var group in BASE_SECURITY_GROUPS) {
+        if (document.getElementById('checkbox_assign_'+group).checked) {
+          groups_to_assign.push(group)
+        }
+      }
+      assign_security_groups(project_id, groups_to_assign)
+      break
     default:
 
   }
@@ -57,13 +86,17 @@ function action_requested_on_instance(id, project_id) {
   })
 }
 
+// populates cloudman with inital data
 function populate_with_initial_data() {
+  set_loader(true)
   set_all_instances(function () {
     build_vm_interaction_table(function() {
       set_loader(false)
     })
   })
+  set_loader(true)
   get_all_projects(function(projects) {
-    build_security_group_management(projects, [{"name":"first security group"}])
+    build_security_group_management(projects, [])
+    set_loader(false)
   })
 }
