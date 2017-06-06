@@ -15,7 +15,7 @@ function create_accordion_entry(title, content, link) {
 }
 
 
-function build_vm_interaction_table(callback) {
+function build_vm_interaction_table() {
 
     var table = '<table class="table"> \
                     <tr> \
@@ -42,11 +42,10 @@ function build_vm_interaction_table(callback) {
                   </tr>'
     })
     table += "</table>"
-    document.getElementById('vm_interaction_table').innerHTML = table
-    callback()
+     return table
 }
 
-function add_security_group_options(security_groups, callback) {
+function add_security_group_options(security_groups) {
   var content = '<select id="new_rule_security_group"><option>Select Security Group...</option>'
   if (security_groups.length > 1) {
     security_groups.forEach(function (security_group) {
@@ -56,8 +55,7 @@ function add_security_group_options(security_groups, callback) {
     content += '<option selected="selected" value="' + security_groups[0]['id'] + '">' + security_groups[0]['name'] + '</option>'
   }
   content += '</select>'
-  document.getElementById('security_group_select_area').innerHTML = content
-  callback()
+  return content
 }
 
 function build_security_group_management(projects, security_groups) {
@@ -163,5 +161,5 @@ function build_security_group_management(projects, security_groups) {
                         <td></td><td><button onclick="change_occurred(`create_new_group_rule`)">Add</button></td>\
                       </tr>\
                     </table><br>'
-    document.getElementById('security_group_management').innerHTML = content
+    return content
 }

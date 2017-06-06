@@ -10,6 +10,7 @@ function delete_default_security_rules(project_id, group_id, callback) {
 }
 
 // deletes all rules passed in (see delete_default_security_rules)
+// recursive so that callback only gets called once all are deleted
 function delete_security_rules(project_id, rules_to_delete, callback) {
   if (rules_to_delete.length == 0) {
     callback()
@@ -48,8 +49,6 @@ function create_new_group_rule(security_group_id, project_id, type, direction) {
           set_loader(false)
           if (body['security_group_rule']) {
             display_alert(true, true, 'New security rule has been added successfully.')
-          } else if (body.NeutronError && body.NeutronError['type'] == "SecurityGroupRuleExists") {
-            display_alert(false, true, 'This security rule already exists so no action was taken.')
           } else {
             display_alert(false, true, 'An error occurred adding the new rule.')
           }
@@ -95,11 +94,6 @@ function create_new_security_group(name, description, project_id, callback) {
           }
         }
     make_POST_request(url, project_id, post_data, function(body) {
-      document.getElementById('new_security_group_name').value = ""
-      document.getElementById('new_security_group_desc').value = ""
-      document.getElementById('new_security_group_proj_id').selectedIndex = 0;
-      set_loader(false)
-      display_alert(true, true, 'The security group "'+ name +'" has been created successfully.')
       callback(body['security_group']['id'])
     })
 }
@@ -107,7 +101,6 @@ function create_new_security_group(name, description, project_id, callback) {
 // assigns our predefined security groups
 function assign_security_groups(project_id, groups_to_assign) {
   groups_to_assign.forEach(function (group_key) {
-
     group = BASE_SECURITY_GROUPS[group_key]
     // delete any old versions/duplicates that may already exist
     delete_security_groups_by_name(project_id, group_key, function () {
@@ -115,18 +108,23 @@ function assign_security_groups(project_id, groups_to_assign) {
         // delete default rules added on group create
         delete_default_security_rules(project_id, new_security_group_id, function () {
           // create group specific rules
-          group = BASE_SECURITY_GROUPS[group_key]
-          group['rules'].forEach(function (rule) {
-            if (rule['ingress']) {
-              create_new_group_rule(new_security_group_id, project_id, rule['type'], "ingress")
-            }
-            if (rule['egress']) {
-              create_new_group_rule(new_security_group_id, project_id, rule['type'], "egress")
-            }
-          })
+          assign_rules_to_new_group(group_key)
         })
       })
     })
+  })
+}
+
+// assings our predefined rules once one of our predefined group is created
+function assign_rules_to_new_group(project_id, new_security_group_id, group_key) {
+  group = BASE_SECURITY_GROUPS[group_key]
+  group['rules'].forEach(function (rule) {
+    if (rule['ingress']) {
+      create_new_group_rule(new_security_group_id, project_id, rule['type'], "ingress")
+    }
+    if (rule['egress']) {
+      create_new_group_rule(new_security_group_id, project_id, rule['type'], "egress")
+    }
   })
 }
 
@@ -148,4 +146,14 @@ function get_all_security_groups(project_id, callback) {
     make_GET_request(url, project_id, function(body) {
       callback(body['security_groups'])
     })
+}
+
+function handle_os_network_errors(NeutronError) {
+  if (NeutronError['type'] == "OverQuota") {
+    display_alert(false, true, "You have exceeded the quota for this action.")
+  } else if (NeutronError['type'] == "SecurityGroupRuleExists") {
+    display_alert(false, true, 'This security rule already exists so no action was taken.')
+  } else {
+    display_alert(false, true, "An unknown error occurred while interaction with OpenStack's networks service.")
+  }
 }

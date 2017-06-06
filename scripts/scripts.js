@@ -14,16 +14,20 @@ function change_occurred(command, id, alt_id) {
       var name = document.getElementById('new_security_group_name').value
       var description = document.getElementById('new_security_group_desc').value
       var project_id = document.getElementById('new_security_group_proj_id').value
-      create_new_security_group(name, description, project_id)
+      create_new_security_group(name, description, project_id, function() {
+        document.getElementById('new_security_group_name').value = ""
+        document.getElementById('new_security_group_desc').value = ""
+        document.getElementById('new_security_group_proj_id').selectedIndex = 0;
+        set_loader(false)
+        display_alert(true, true, 'The security group "'+ name +'" has been created successfully.')
+      })
       break
     case "retrieve_security_groups_for_new_rule":
       set_loader(true)
       var project_id = document.getElementById('new_rule_project_select').value
       get_all_security_groups(project_id, function(security_groups) {
-        add_security_group_options(security_groups, function() {
-          set_loader(false)
-        })
-
+        document.getElementById('security_group_select_area').innerHTML = add_security_group_options(security_groups)
+        set_loader(false)
       })
       break
     case 'create_new_group_rule':
@@ -89,14 +93,13 @@ function action_requested_on_instance(id, project_id) {
 // populates cloudman with inital data
 function populate_with_initial_data() {
   set_loader(true)
-  set_all_instances(function () {
-    build_vm_interaction_table(function() {
-      set_loader(false)
-    })
+  define_all_instances(function () {
+    document.getElementById('vm_interaction_table').innerHTML = build_vm_interaction_table()
+    set_loader(false)
   })
   set_loader(true)
   get_all_projects(function(projects) {
-    build_security_group_management(projects, [])
+    document.getElementById('security_group_management').innerHTML = build_security_group_management(projects, [])
     set_loader(false)
   })
 }

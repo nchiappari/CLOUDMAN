@@ -1,26 +1,23 @@
 
 function make_UNSCOPED_GET_request(url, callback) {
-  request({
-      url: url,
-      method: 'GET',
-      headers: {'X-Auth-Token': UNSCOPED_TOKEN},
-      json: true
-  }, function(error, response, body) {
-      handle_response(error, response, body, callback)
-  });
+  handle_making_GET_request(url, UNSCOPED_TOKEN, callback)
 }
 
 function make_GET_request(url, project_id, callback) {
   get_token(project_id, function(token) {
-    request({
-        url: url,
-        method: 'GET',
-        headers: {'X-Auth-Token': token},
-        json: true
-    }, function(error, response, body) {
-        handle_response(error, response, body, callback)
-    });
+    handle_making_GET_request(url, token, callback)
   })
+}
+
+function handle_making_GET_request(url, token, callback) {
+  request({
+      url: url,
+      method: 'GET',
+      headers: {'X-Auth-Token': token},
+      json: true
+  }, function(error, response, body) {
+      handle_response(error, response, body, callback)
+  });
 }
 
 function make_POST_request(url, project_id, post_data, callback) {
@@ -52,9 +49,9 @@ function handle_response(error, response, body, callback) {
   if (response.statusCode && response.statusCode == 401) {
     set_loader(false)
     display_alert(false, true, "You are not authorized to complete this action.")
-  } else if (body.NeutronError && body.NeutronError['type'] == "OverQuota") {
+  } else if (body.NeutronError) {
     set_loader(false)
-    display_alert(false, true, "You have exceeded the quota for this action.")
+    handle_os_network_errors(body.NeutronError)
   } else if (error) {
     set_loader(false)
     console.error("error handling coming to a codebase near you soon"+response)
@@ -87,6 +84,26 @@ function set_access_token(project_id, callback) {
     });
 }
 
+function build_endpoints(body, callback) {
+  var catalog = body['token']['catalog']
+  catalog.forEach(function (service) {
+    var endpoints = service['endpoints']
+    for (var i = 0; i < endpoints.length; i += 1) {
+      if (endpoints[i]['interface'] == "public") {
+        var url = endpoints[i]['url']
+        break
+      }
+    }
+    if (service['name'] == "nova") {
+      URL_COMPUTE = url
+    } else if (service['name'] == "neutron") {
+      URL_NETWORKING = url
+    } else if (service['name'] == "keystone") {
+      URL_IDENTITY = url.replace("/v2.0", "/v3") //v2.0 is deprecated
+    }
+  })
+}
+
 
 // TODO not actually unscoped yet
 function set_unscoped_access_token(callback) {
@@ -105,30 +122,15 @@ function set_unscoped_access_token(callback) {
         display_alert(false, false, "Could not connect to OpenStack.")
       } else {
         UNSCOPED_TOKEN = response['headers']['x-subject-token']
-        var catalog = body['token']['catalog']
-        catalog.forEach(function (service) {
-          var endpoints = service['endpoints']
-          for (var i = 0; i < endpoints.length; i += 1) {
-            if (endpoints[i]['interface'] == "public") {
-              var url = endpoints[i]['url']
-              break
-            }
-          }
-          if (service['name'] == "nova") {
-            URL_COMPUTE = url
-          } else if (service['name'] == "neutron") {
-            URL_NETWORKING = url
-          } else if (service['name'] == "keystone") {
-            URL_IDENTITY = url.replace("/v2.0", "/v3") //v2.0 is deprecated
-          }
-        })
+        build_endpoints(body)
         callback()
       }
     });
 }
 
+
 // defines global all_instances
-function set_all_instances(callback) {
+function define_all_instances(callback) {
   make_UNSCOPED_GET_request(URL_COMPUTE + "/servers/detail", function(body) {
     all_instances = body['servers']
     callback()
