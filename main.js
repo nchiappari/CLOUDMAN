@@ -13,8 +13,6 @@ let mainWindow
 
 // // Listen for async message from renderer process
 // ipcMain.on('async', (event, arg) => {
-//     // Print 1
-//     console.log("MAIN RECEIVED: "+arg);
 // });
 
 
