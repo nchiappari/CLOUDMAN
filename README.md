@@ -45,3 +45,14 @@
  * Cluster logs
    * Nova, neutron, cinder, glance, keystone
    * Apache error
+
+
+## TODO
+ * make alert overlay not just be placed at top
+ * check set_loader being called correct number of times
+
+
+
+
+
+ .
