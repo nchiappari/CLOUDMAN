@@ -36,6 +36,7 @@
 ## TODO
  * make alert overlay not just be placed at top
  * check set_loader being called correct number of times
+ * handle error from token expiring
 
 
 
