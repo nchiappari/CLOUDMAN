@@ -47,13 +47,13 @@ function make_DELETE_request(url, project_id, callback) {
 
 function handle_response(error, response, body, callback) {
   if (response.statusCode && response.statusCode == 401) {
-    set_loader(false)
+    reset_loader()
     display_alert(false, true, "You are not authorized to complete this action.")
   } else if (body.NeutronError) {
-    set_loader(false)
+    reset_loader(false)
     handle_os_network_errors(body.NeutronError)
   } else if (error) {
-    set_loader(false)
+    reset_loader(false)
     console.error("error handling coming to a codebase near you soon"+response)
   } else {
     callback(body)
@@ -118,7 +118,7 @@ function set_unscoped_access_token(callback) {
       json: post_data
     }, function(error, response, body) {
       if (error) {
-        set_loader(false)
+        reset_loader()
         display_alert(false, false, "Could not connect to OpenStack.")
       } else {
         UNSCOPED_TOKEN = response['headers']['x-subject-token']

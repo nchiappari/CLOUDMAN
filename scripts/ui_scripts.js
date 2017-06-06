@@ -26,7 +26,8 @@ function set_loader(bool) {
 }
 
 function reset_loader() {
-  DISPLAY_LOADER_COUNT = 0
+  DISPLAY_LOADER_COUNT = 1
+  set_loader(false)
 }
 
 

@@ -42,11 +42,12 @@ function change_occurred(command, id, alt_id) {
         var project_id = document.getElementById('new_rule_project_select').value
         var type = document.getElementById('new_rule_type').value
       } catch (err) {
-        set_loader(false)
+        reset_loader()
         display_alert(false, true, "Please fill out all required fields.")
         return
       }
       create_new_group_rule(security_group_id, project_id, type, direction)
+      set_loader(false)
       break
     case 'submit_assign':
       var project_id = document.getElementById('select_project_group_assign').value
@@ -84,16 +85,39 @@ function action_requested_on_instance(id, project_id) {
         break
       }
     }
-    build_vm_interaction_table(function() {
-      set_loader(false)
-    })
+    build_vm_interaction_table()
+    set_loader(false)
   })
 }
 
+function fill_cloud_info_area() {
+  var error_instances = []
+  all_instances.forEach(function(instance) {
+    if (instance.status == "ERROR") {
+      error_instances.push(instance.name)
+    }
+  })
+  var error_count = error_instances.length
+  if (error_count == 0) {
+    var content = "There currently are no instances in an error state."
+  } else if (error_count == 1) {
+    var content = '<b>Warning:</b> The instance "' + error_instances[0] + '" currently is in an error state.'
+  } else {
+    var content = '<b>Warning:</b> There currently are ' + error_count + ' instances in an error state:<br>'
+    error_instances.forEach(function (error_instance) {
+      content += error_instance + '<br>'
+    })
+  }
+  document.getElementById('cloud_info_area').innerHTML = content
+}
+
 // populates cloudman with inital data
+// set_loader tracks how many times it is called and only removes loading icon once set_loader(false)
+// has been called the same amount as set_loader(true)
 function populate_with_initial_data() {
   set_loader(true)
   define_all_instances(function () {
+    fill_cloud_info_area()
     document.getElementById('vm_interaction_table').innerHTML = build_vm_interaction_table()
     set_loader(false)
   })
@@ -102,4 +126,5 @@ function populate_with_initial_data() {
     document.getElementById('security_group_management').innerHTML = build_security_group_management(projects, [])
     set_loader(false)
   })
+
 }

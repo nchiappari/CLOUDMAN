@@ -46,7 +46,6 @@ function create_new_group_rule(security_group_id, project_id, type, direction) {
             }
         }
         make_POST_request(url, project_id, post_data, function(body) {
-          set_loader(false)
           if (body['security_group_rule']) {
             display_alert(true, true, 'New security rule has been added successfully.')
           } else {
