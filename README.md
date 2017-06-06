@@ -5,24 +5,10 @@
 
  Dependencies:
   * node.js
-  * npm
   * electron (`npm install electron`)
 
   Start CloudMan:  
   `npm start`
-
- ## Goals
- Data Machines is currently in charge of quite a few OpenStack clouds. These
- deployments are all different sizes, versions, hardware compositions, etc. What
- they do share is the fact that OpenStack has had a fairly stable API and it is
- well versioned. We should be able to bubble up all of the statistics and
- information we care about into a single desktop application we can install
- on our machines.
-
- ## Initial Dependencies
- * electron
- * nodejs
- * python-openstackclient
 
  ## Priorities
  * Read only information about each cloud
@@ -55,4 +41,5 @@
 
 
 
- .
+
+https://github.com/datamachines/intern-2017-project-ideas/blob/master/projects/cloudman.md
