@@ -32,11 +32,11 @@ function reset_loader() {
 
 
 function display_alert(is_success, is_timeout, message) {
-  var success = '<div class="alert alert-success alert-dismissable fade in">\
+  var success = '<div class="alert alert-success alert-dismissable fade in cloudman-alert">\
     <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>\
     <strong>Success!</strong> ' + message + ' \
   </div>';
-  var failure = '<div class="alert alert-danger alert-dismissable fade in">\
+  var failure = '<div class="alert alert-danger alert-dismissable fade in cloudman-alert">\
     <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>\
     <strong>Error:</strong> ' + message +'\
   </div>'
