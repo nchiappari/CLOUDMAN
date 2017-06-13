@@ -6,15 +6,9 @@ const path = require('path')
 const url = require('url')
 const {ipcMain} = require('electron')
 
-
 // Keep global reference of the window object to prevent closing
 // when the object is garbage collected.
 let mainWindow
-
-// // Listen for async message from renderer process
-// ipcMain.on('async', (event, arg) => {
-// });
-
 
 function createWindow () {
   mainWindow = new BrowserWindow({width: 800, height: 600})
