@@ -37,11 +37,8 @@
  * handle error from token expiring
 
 ## Discuss W/ Mike
-  * cluster logs not accessible through API - read straight from file on machine?
-  * ask about special things to know about project creation (like there was with security groups)
-  * what to show for "resource usage"
-  * where to find hypervisor state
-
+  * cluster logs not accessible through API
+  * what to show for "resource usage" - aggregate of hypervisors
 
 
 
