@@ -20,16 +20,25 @@ function handle_making_GET_request(url, token, callback) {
   });
 }
 
+function make_UNSCOPED_POST_request(url, post_data, callback) {
+  console.log("url:"+url)
+  handle_making_POST_request(url, post_data, UNSCOPED_TOKEN, callback)
+}
+
 function make_POST_request(url, project_id, post_data, callback) {
   get_token(project_id, function (token) {
-    request({
-        url: url,
-        method: 'POST',
-        json: post_data,
-        headers: {'X-Auth-Token': token},
-    }, function(error, response, body) {
-      handle_response(error, response, body, callback)
-    });
+    handle_making_POST_request(url, post_data, token, callback)
+  })
+}
+
+function handle_making_POST_request(url, post_data, token, callback) {
+  request({
+      url: url,
+      method: 'POST',
+      json: post_data,
+      headers: {'X-Auth-Token': token},
+  }, function(error, response, body) {
+    handle_response(error, response, body, callback)
   })
 }
 
@@ -49,6 +58,9 @@ function handle_response(error, response, body, callback) {
   if (response.statusCode && response.statusCode == 401) {
     reset_loader()
     display_alert(false, true, "You are not authorized to complete this action.")
+  } else if (response.statusCode && response.statusCode == 404) {
+    reset_loader()
+    display_alert(false, true, "OpenStack returned a 404 Not Found response.")
   } else if (body.NeutronError) {
     reset_loader(false)
     handle_os_network_errors(body.NeutronError)

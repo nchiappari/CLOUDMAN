@@ -59,6 +59,38 @@ function change_occurred(command, id, alt_id) {
       }
       assign_security_groups(project_id, groups_to_assign)
       break
+    case 'create_new_proj':
+      display_alert(false, true, 'Not yet implemented to completion. Don\'t trust any other notifications')
+      var name = document.getElementById('new_proj_name_input').value
+      var desc = document.getElementById('new_proj_desc_input').value
+      var url = URL_IDENTITY + "/projects"
+      post_data = {
+          "project": {
+              "description": desc,
+              "domain_id": USERS_DOMAIN_ID,
+              "enabled": true,
+              "is_domain": false,
+              "name": name
+          }
+      }
+      make_UNSCOPED_POST_request(url, post_data, function(body) {
+        console.log(body)
+        var project_id = body['project']['id']
+        if (project_id) {
+          // Network creation
+          // create_new_network(name, project_id)
+          // subnet creation
+          // create_new_subnet(name, project_id, network_id, cidr)
+          // Router creation
+          // create_new_router(name, project_id, network_id, ip_address, subnet_id)
+          // Gateway config
+          // Security groups defaults
+          // display_alert(true, true, 'The group "' + name + '" has been created successfully.')
+        } else {
+          display_alert(false, true, 'An unknown error occurred creating this group.')
+        }
+      })
+
     default:
 
   }
@@ -111,20 +143,30 @@ function fill_cloud_info_area() {
   document.getElementById('cloud_info_area').innerHTML = content
 }
 
+
 // populates cloudman with inital data
 // set_loader tracks how many times it is called and only removes loading icon once set_loader(false)
 // has been called the same amount as set_loader(true)
 function populate_with_initial_data() {
+  // populate VM Interaction section
   set_loader(true)
   define_all_instances(function () {
     fill_cloud_info_area()
     document.getElementById('vm_interaction_table').innerHTML = build_vm_interaction_table()
     set_loader(false)
   })
+  // populate Security Group Management section
   set_loader(true)
   get_all_projects(function(projects) {
     document.getElementById('security_group_management').innerHTML = build_security_group_management(projects, [])
     set_loader(false)
   })
+  // populate Project Management section
+  set_loader(true)
+  init_proj_management(function(content) {
+    document.getElementById('project_management').innerHTML = content
+    set_loader(false)
+  })
+
 
 }

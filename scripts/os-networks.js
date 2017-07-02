@@ -156,3 +156,59 @@ function handle_os_network_errors(NeutronError) {
     display_alert(false, true, "An unknown error occurred while interaction with OpenStack's networks service.")
   }
 }
+
+// ################################################################################ //
+
+function create_new_network(name, project_id) {
+  post_data = {
+      "network": {
+          "name": "network_" + name,
+          "admin_state_up": true,
+          // "project_id": project_id
+      }
+  }
+  var url = URL_NETWORKING + "/v2.0/networks"
+  make_POST_request(url, project_id, post_data, function(body) {
+    // TODO handle response
+  })
+
+}
+
+
+
+function create_new_subnet(name, project_id, network_id, cidr) {
+  post_data = {
+      "subnet": {
+          "name": "subnet_" + name,
+          "network_id": network_id,
+          "ip_version": 4,
+          "cidr": cidr
+      }
+  }
+  var url = URL_NETWORKING + "/v2.0/subnets"
+  make_POST_request(url, project_id, post_data, function(body) {
+    // TODO handle response
+  })
+}
+
+function create_new_router(name, project_id, network_id, ip_address, subnet_id) {
+  post_data = {
+      "router": {
+          "name": "router_" + name,
+          "external_gateway_info": {
+              "network_id": network_id,
+              "external_fixed_ips": [
+                  {
+                      "ip_address": ip_address,
+                      "subnet_id": subnet_id
+                  }
+              ]
+          },
+          "admin_state_up": true
+      }
+  }
+  var url = URL_NETWORKING + "/v2.0/routers"
+  make_POST_request(url, project_id, post_data, function(body) {
+    // TODO handle response
+  })
+}

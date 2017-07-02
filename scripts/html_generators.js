@@ -1,4 +1,5 @@
 
+
 function create_accordion_entry(title, content, link) {
   return '<div class="panel panel-default"> \
             <div class="panel-heading"> \
@@ -162,4 +163,20 @@ function build_security_group_management(projects, security_groups) {
                       </tr>\
                     </table><br>'
     return content
+}
+
+
+function init_proj_management(callback) {
+  var content = '<b>Create New Project</b><table>\
+                    <tr>\
+                      <td>Name:</td><td><input id="new_proj_name_input" type="text"></td>\
+                    </tr>\
+                    <tr>\
+                      <td>Description:</td><td><input id="new_proj_desc_input" type="text"></td>\
+                    </tr>\
+                    <tr>\
+                      <td></td><td><button onclick="change_occurred(`create_new_proj`)">Create</button></td>\
+                    </tr>\
+                  </table>'
+  callback(content)
 }
